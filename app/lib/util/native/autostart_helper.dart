@@ -1,9 +1,15 @@
+// The Windows registry branches are stubbed for the Vita build.
+//
+// win32_registry 2.x renamed the whole API (Registry.openPath, RegistryHive,
+// AccessRights, RegistryValue), and the only reason this file is being compiled
+// at all is that Dart compiles every branch of a switch on defaultTargetPlatform
+// whether or not the platform can occur. Porting Windows autostart to run on a
+// PS Vita is not a thing; returning false is.
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:win32_registry/win32_registry.dart';
 
 const startHiddenFlag = '--hidden';
 
@@ -57,12 +63,7 @@ Terminal=false
         ''');
         return true;
       case TargetPlatform.windows:
-        _getWindowsRegistryKey().createValue(RegistryValue(
-          _windowsRegistryKeyValue,
-          RegistryValueType.string,
-          '"${Platform.resolvedExecutable}"${startHidden ? ' $startHiddenFlag' : ''}',
-        ));
-        return true;
+        return false;
       default:
         return false;
     }
@@ -83,7 +84,6 @@ Future<bool> disableAutoStart() async {
         File(_getMacOSFilePath(packageInfo.packageName)).deleteSync();
         break;
       case TargetPlatform.windows:
-        _getWindowsRegistryKey().deleteValue(_windowsRegistryKeyValue);
         break;
       default:
         break;
@@ -103,7 +103,7 @@ Future<bool> isAutoStartEnabled() async {
     case TargetPlatform.macOS:
       return File(_getMacOSFilePath(packageInfo.packageName)).existsSync();
     case TargetPlatform.windows:
-      return _getWindowsRegistryKey().getValueAsString(_windowsRegistryKeyValue)?.contains(Platform.resolvedExecutable) ?? false;
+      return false;
     default:
       return false;
   }
@@ -125,21 +125,13 @@ Future<bool> isAutoStartHidden() async {
       }
       return file.readAsStringSync().contains(startHiddenFlag);
     case TargetPlatform.windows:
-      return _getWindowsRegistryKey().getValueAsString(_windowsRegistryKeyValue)?.contains(startHiddenFlag) ?? false;
+      return false;
     default:
       return false;
   }
 }
 
-const _windowsRegistryKeyValue = 'LocalSend';
 
-RegistryKey _getWindowsRegistryKey() {
-  return Registry.openPath(
-    RegistryHive.currentUser,
-    path: r'Software\Microsoft\Windows\CurrentVersion\Run',
-    desiredAccessRights: AccessRights.allAccess,
-  );
-}
 
 String _getLinuxFilePath(String appName) {
   return '${Platform.environment['HOME']}/.config/autostart/$appName.desktop';

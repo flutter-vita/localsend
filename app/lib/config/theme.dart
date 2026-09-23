@@ -125,7 +125,12 @@ extension ColorSchemeExt on ColorScheme {
   }
 }
 
-extension InputDecorationThemeExt on InputDecorationTheme {
+// InputDecorationThemeData, not InputDecorationTheme: as of Flutter 3.32 the
+// ThemeData getter returns the ...Data form, so an extension on the widget
+// class no longer applies to `Theme.of(context).inputDecorationTheme`. Part of
+// the framework-wide XxxTheme -> XxxThemeData rename; nothing to do with the
+// Vita.
+extension InputDecorationThemeExt on InputDecorationThemeData {
   BorderRadius get borderRadius => _borderRadius;
 }
 

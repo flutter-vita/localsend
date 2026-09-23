@@ -14,12 +14,16 @@ bool checkPlatformIsNot(List<TargetPlatform> platforms, {bool web = false}) {
 
 /// This platform runs on a "traditional" computer
 bool checkPlatformIsDesktop() {
-  return checkPlatform([TargetPlatform.linux, TargetPlatform.windows, TargetPlatform.macOS]);
+  // The Vita reports itself as TargetPlatform.linux (ADR-0008), which is right
+  // for paths and fonts and wrong for furniture: a handheld has no window to
+  // position, no tray, and no second instance to hand over to. Left as linux,
+  // window_manager throws during preInit and the app never reaches runApp.
+  return false;
 }
 
 /// This platform supports tray
 bool checkPlatformHasTray() {
-  return checkPlatform([TargetPlatform.windows, TargetPlatform.macOS, TargetPlatform.linux]);
+  return false;
 }
 
 /// This platform can receive share intents
