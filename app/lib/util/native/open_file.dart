@@ -22,8 +22,22 @@ Future<void> openFile(
     return;
   }
 
-  final fileOpenResult = await OpenFilex.open(filePath);
-  if (fileOpenResult.type != ResultType.done && context.mounted) {
+  // OpenFilex *throws* on the Vita rather than returning a failed result: the
+  // port reports TargetPlatform.linux, so open_filex takes its Linux branch and
+  // DynamicLibrary.open('libc.so.6') to reach system(). There is no libc.so.6
+  // here and no dlopen at all.
+  //
+  // The throw is what made this a dead tap. CannotOpenFileDialog already
+  // exists, is translated, and names the file -- and it was never reached,
+  // because the exception escaped before the result was ever looked at.
+  ResultType resultType;
+  try {
+    final fileOpenResult = await OpenFilex.open(filePath);
+    resultType = fileOpenResult.type;
+  } catch (_) {
+    resultType = ResultType.error;
+  }
+  if (resultType != ResultType.done && context.mounted) {
     await CannotOpenFileDialog.open(context, filePath, onDeleteTap);
   }
 }
