@@ -62,9 +62,11 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
 
     // init
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        WakelockPlus.enable(); // ignore: discarded_futures
-      } catch (_) {}
+      // The Vita has no wakelock plugin, and needs none: its embedder keeps
+      // the console awake while an app is in front. The call fails there, and
+      // a try/catch does not see a future that nobody awaits, so the failure
+      // was an unhandled exception on every transfer.
+      WakelockPlus.enable().ignore();
 
       if (ref.read(settingsProvider).autoFinish) {
         _finishTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -121,9 +123,7 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
     super.dispose();
     _finishTimer?.cancel();
     unawaited(TaskbarHelper.clearProgressBar());
-    try {
-      unawaited(WakelockPlus.disable());
-    } catch (_) {}
+    WakelockPlus.disable().ignore();
   }
 
   Future<bool> _onWillPop() async {
