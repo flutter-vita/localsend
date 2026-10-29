@@ -140,8 +140,10 @@ flutter_gen:
   line_length: 150
 
 # The PS Vita build (flutter-vita): its own title id, so it installs beside the
-# apps in the dev slot, and LiveArea art made from assets/img/logo-512.png.
+# apps in the dev slot, and LiveArea art and a splash made from
+# assets/img/logo-512.png.
 vita:
   title_id: LSND00001
   name: LocalSend
   livearea: vita/livearea
+  splash: vita/splash.png
